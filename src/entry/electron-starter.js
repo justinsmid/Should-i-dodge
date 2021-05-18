@@ -1,13 +1,15 @@
 const electron = require('electron');
 const path = require('path');
 const url = require('url');
-const LCUConnector = require('lcu-connector');
+const {ExpressServer} = require('./ExpressServer');
 
 const {app, BrowserWindow} = electron;
 
-const btoa = string => Buffer.from(string).toString('base64');
-
 let mainWindow;
+
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+
+const EXPRESS_PORT = 6969;
 
 function createWindow() {
     console.log('Creating electron window...');
@@ -34,18 +36,20 @@ function createWindow() {
         mainWindow = null
     });
 
-    readLCUData()
-        .then(data => {
-            console.log('LCU data received: ', data);
-            global.LCU_data = data;
-            global.LCU_auth = `${btoa(`${global.LCU_data.username}:${global.LCU_data.password}`)}`;
-        })
-        .catch(err => {
-            console.error(err);
-            electron.dialog.showErrorBox(
-                'LCU data reading timed out',
-                'This is probably because no open League client could be found. Please make sure your League client is running and restart this app.'
-            );
+    const expressServer = new ExpressServer(EXPRESS_PORT);
+    expressServer.start()
+        .then(() => console.log(`Express server listening at 'http://localhost:${global.expressServerPort}'`))
+        .catch(error => {
+            console.error(`ERROR: Could not start express server`);
+            console.error(error);
+
+            if (error.startsWith('[LCU_TIMEOUT]')) {
+                electron.dialog.showErrorBox(
+                    'LCU data reading timed out',
+                    'This is probably because no open League client could be found. Please make sure your League client is running and restart this app.'
+                );
+            }
+
             mainWindow.close();
         });
 }
@@ -63,24 +67,3 @@ app.on('activate', function () {
         createWindow()
     }
 });
-
-const readLCUData = () => {
-    return new Promise((resolve, reject) => {
-        debugger;
-        const lcuConnector = new LCUConnector();
-
-        lcuConnector.on('connect', data => {
-            resolve(data);
-        });
-
-        lcuConnector.on('disconnect', () => {
-            console.warn(`WARN: LCU connector disconnected.`);
-        });
-
-        lcuConnector.start();
-
-        setTimeout(() => {
-            reject(`[LCU_TIMEOUT]: Express server timed out while attempting to read LCU data. Probably because no running League Client was found.`);
-        }, 10000);
-    });
-};
