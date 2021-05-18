@@ -12,7 +12,11 @@ const tryConnection = () => client.connect({port: port}, () => {
             console.log('starting electron');
             startedElectron = true;
             const exec = require('child_process').exec;
-            exec('npm run electron');
+            const electronApp = exec('npm run electron');
+
+            electronApp.stdout.on('data', console.log);
+            electronApp.stderr.on('data', console.error);
+            electronApp.on('exit', exitCode => console.log(`Electron app exited with code ${exitCode.toString()}`));
         }
     }
 );
