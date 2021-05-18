@@ -2,7 +2,7 @@
   "name": "should-i-dodge",
   "version": "0.1.0",
   "private": true,
-  "main": "src/electron-starter.js",
+  "main": "src/entry/electron-starter.js",
   "homepage": "./",
   "author": "Justin Smid <justin250899@hotmail.com>",
   "scripts": {
