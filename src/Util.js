@@ -1,4 +1,13 @@
-import React, {useEffect} from "react";
+import React, {useEffect, useState} from "react";
+
+const electron = window.require('electron');
+
+export const getGlobal = electron.remote.getGlobal;
+
+export const useForceUpdate = () => {
+    const [value, setValue] = useState(0);
+    return () => setValue(value => value + 1);
+}
 
 export const includesIgnoreCase = (target, string) => {
     if (typeof target !== "string" || typeof string !== "string") return false;

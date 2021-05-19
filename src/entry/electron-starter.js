@@ -4,6 +4,7 @@ const url = require('url');
 const {ExpressServer} = require('./ExpressServer');
 const {startServer: startOpggApiServer} = require('../../op.gg-api/server');
 const {Tray, Menu} = require('electron');
+const Settings = require('../Settings');
 
 const {app, BrowserWindow} = electron;
 
@@ -102,6 +103,8 @@ const createTray = () => {
 };
 
 app.on('ready', async () => {
+    global.settings = Settings.fromStorageOrNew();
+
     mainWindow = createMainWindow();
     expressServer = await startExpressServer();
     opggApiServer = await startOpggApiServer();
