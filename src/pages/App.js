@@ -1,5 +1,7 @@
+import {Route, BrowserRouter as Router, Switch} from 'react-router-dom';
+import routes from './routes';
+
 const isElectron = require('is-electron');
-const {default: Homepage} = require('./Homepage');
 
 function App() {
   // Close the browser tab that's opened on launch in the actual browser and not in electron.
@@ -9,7 +11,13 @@ function App() {
   
   return (
     <div>
-      <Homepage />
+      <Router>
+        <Switch>
+          {routes.map(route => (
+            <Route key={route.title} exact path={route.path} component={route.component} />
+          ))}
+        </Switch>
+      </Router>
     </div>
   );
 }

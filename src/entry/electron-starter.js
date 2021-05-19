@@ -16,6 +16,12 @@ let expressServer;
 let opggApiServer;
 let tray;
 
+const baseUrl = process.env.ELECTRON_START_URL || url.format({
+    pathname: path.join(__dirname, '/../build/index.html'),
+    protocol: 'file:',
+    slashes: true
+});
+
 async function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 1024,
@@ -27,12 +33,7 @@ async function createMainWindow() {
         }
     });
 
-    const startUrl = process.env.ELECTRON_START_URL || url.format({
-        pathname: path.join(__dirname, '/../build/index.html'),
-        protocol: 'file:',
-        slashes: true
-    });
-    mainWindow.loadURL(startUrl);
+    mainWindow.loadURL(baseUrl);
 
     mainWindow.webContents.openDevTools();
 
@@ -70,7 +71,25 @@ const createTray = () => {
     const contextMenu = Menu.buildFromTemplate([
         {label: 'settings', type: 'normal', click: () => {
             console.log(`Opening settings...`);
-            // TODO: Open settings window
+
+            settingsWindow = new BrowserWindow({
+                width: 1024,
+                height: 768,
+                webPreferences: {
+                    nodeIntegration: true,
+                    enableRemoteModule: true,
+                    contextIsolation: false
+                }
+            });
+        
+            const settingsUrl = (baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'settings');
+            settingsWindow.loadURL(settingsUrl);
+        
+            settingsWindow.webContents.openDevTools();
+        
+            settingsWindow.on('closed', function () {
+                settingsWindow = null
+            });
         }},
         {label: 'exit', type: 'normal', click: () => {
             console.log(`Exiting...`);
@@ -104,6 +123,7 @@ app.on('activate', function () {
 const exit = () => {
     expressServer?.close();
     opggApiServer?.close();
+    tray?.destroy();
     app.quit();
     process.exit(0);
 }
