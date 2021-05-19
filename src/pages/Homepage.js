@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {get} from '../Api';
 import {useEffectOnce} from '../Util';
 import './Homepage.css';
+import OPGGClient from '../../op.gg-api/client';
 
 const Homepage = () => {
     const [inChampSelect, setInChampSelect] = useState(false);
@@ -31,20 +32,17 @@ const Homepage = () => {
 
     return (
         <div>
-            <p>Homepage!</p>
-            <div>
-                {
-                    inChampSelect ?
-                        <ChampSelectView data={champSelectData} />
-                        : <p>Waiting for champ select...</p>
-                }
-            </div>
+            {inChampSelect ?
+                <ChampSelectView data={champSelectData} />
+                : <p>Waiting for champ select...</p>
+            }
         </div>
     );
 };
 
 const ChampSelectView = ({data}) => {
     const [summonerNames, setSummonerNames] = useState([]);
+    const opggClient = new OPGGClient();
 
     useEffectOnce(() => {
         const getSummonerNames = async () => {
@@ -56,10 +54,23 @@ const ChampSelectView = ({data}) => {
                 })
             );
 
+            summonerNames.forEach(async name => {
+                console.log(`OP.GG data for summoner '${name}':`);
+
+                // TODO: Un-hardcode server 'na'
+                const response = await opggClient.SummonerStats('na', name);
+
+                console.log(response);
+            });
+
             setSummonerNames(summonerNames);
         }
 
         getSummonerNames();
+
+        return () => {
+            opggClient.close();
+        };
     });
 
     return (
@@ -67,7 +78,7 @@ const ChampSelectView = ({data}) => {
             <p>Champ select found!</p>
             <div className="flex">
                 {summonerNames.map(name => (
-                    <div className="summoner">
+                    <div key={name} className="summoner">
                         <p>{name}</p>
                     </div>
                 ))}

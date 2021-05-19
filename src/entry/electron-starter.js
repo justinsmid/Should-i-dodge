@@ -2,6 +2,7 @@ const electron = require('electron');
 const path = require('path');
 const url = require('url');
 const {ExpressServer} = require('./ExpressServer');
+const {startServer: startOpggApiServer} = require('../../op.gg-api/server');
 
 const {app, BrowserWindow} = electron;
 
@@ -11,7 +12,7 @@ process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
 const EXPRESS_PORT = 6969;
 
-function createWindow() {
+async function createWindow() {
     console.log('Creating electron window...');
 
     mainWindow = new BrowserWindow({
@@ -52,6 +53,8 @@ function createWindow() {
 
             mainWindow.close();
         });
+
+    const opggApiServer = await startOpggApiServer();
 }
 
 app.on('ready', createWindow);
