@@ -14,7 +14,7 @@
     "dev": "nf start",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "preinstall": "submodules-install"
+    "postinstall": "submodules-install"
   },
   "submodules": [
     "op.gg-api/"
