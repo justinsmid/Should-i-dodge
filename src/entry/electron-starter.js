@@ -3,18 +3,20 @@ const path = require('path');
 const url = require('url');
 const {ExpressServer} = require('./ExpressServer');
 const {startServer: startOpggApiServer} = require('../../op.gg-api/server');
+const {Tray, Menu} = require('electron');
 
 const {app, BrowserWindow} = electron;
-
-let mainWindow;
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
 const EXPRESS_PORT = 6969;
 
-async function createWindow() {
-    console.log('Creating electron window...');
+let mainWindow;
+let expressServer;
+let opggApiServer;
+let tray;
 
+async function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 1024,
         height: 768,
@@ -38,6 +40,10 @@ async function createWindow() {
         mainWindow = null
     });
 
+    return mainWindow;
+};
+
+const startExpressServer = () => {
     const expressServer = new ExpressServer(EXPRESS_PORT);
     expressServer.start()
         .then(() => console.log(`Express server listening at 'http://localhost:${global.expressServerPort}'`))
@@ -52,22 +58,52 @@ async function createWindow() {
                 );
             }
 
-            mainWindow.close();
+            mainWindow?.close();
         });
+    return expressServer;
+};
 
-    const opggApiServer = await startOpggApiServer();
-}
+const createTray = () => {
+    const tray = new Tray(path.join(__dirname, '../../public/favicon.ico'));
+    tray.setToolTip('Should-i-dodge');
 
-app.on('ready', createWindow);
+    const contextMenu = Menu.buildFromTemplate([
+        {label: 'settings', type: 'normal', click: () => {
+            console.log(`Opening settings...`);
+            // TODO: Open settings window
+        }},
+        {label: 'exit', type: 'normal', click: () => {
+            console.log(`Exiting...`);
+            exit();
+        }},
+    ]);
+
+    tray.setContextMenu(contextMenu);
+    return tray;
+};
+
+app.on('ready', async () => {
+    mainWindow = createMainWindow();
+    expressServer = await startExpressServer();
+    opggApiServer = await startOpggApiServer();
+    tray = createTray();
+});
 
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
-        app.quit()
+        exit();
     }
 });
 
 app.on('activate', function () {
     if (mainWindow === null) {
-        createWindow()
+        createMainWindow()
     }
 });
+
+const exit = () => {
+    expressServer?.close();
+    opggApiServer?.close();
+    app.quit();
+    process.exit(0);
+}

@@ -9,6 +9,9 @@ const btoa = string => Buffer.from(string).toString('base64');
 const jsonResponse = res => res.json();
 
 class ExpressServer {
+    port;
+    server;
+
     constructor(port) {
         this.port = port;
         global.expressServerPort = port;
@@ -16,34 +19,35 @@ class ExpressServer {
     }
 
     start() {
+        const self = this;
         return new Promise((resolve, reject) => {
             try {
-                const server = express();
+                const app = express();
 
-                server.use(cors());
-                server.use(express.json());
+                app.use(cors());
+                app.use(express.json());
 
-                server.get('/', (req, res) => {
+                app.get('/', (req, res) => {
                     res.send('Hello, world!');
                 });
 
-                server.get('/request', async (req, res) => {
+                app.get('/request', async (req, res) => {
                     this.handleRequest({req, res, method: 'GET'});
                 });
 
-                server.post('/request', (req, res) => {
+                app.post('/request', (req, res) => {
                     this.handleRequest({req, res, method: 'POST', options: {body: JSON.stringify(req.body), headers: {'Content-Type': 'application/json'}}});
                 });
 
-                server.put('/request', (req, res) => {
+                app.put('/request', (req, res) => {
                     this.handleRequest({req, res, method: 'PUT', options: {body: JSON.stringify(req.body), headers: {'Content-Type': 'application/json'}}});
                 });
 
-                server.patch('/request', (req, res) => {
+                app.patch('/request', (req, res) => {
                     this.handleRequest({req, res, method: 'PATCH', options: {body: JSON.stringify(req.body), headers: {'Content-Type': 'application/json'}}});
                 });
 
-                server.listen(this.port, async () => {
+                self.server = app.listen(this.port, async () => {
                     global.serverUrl = `http://localhost:${this.port}`;
 
                     this.lcuConnector.on('connect', data => {
@@ -51,8 +55,6 @@ class ExpressServer {
 
                         global.LCU_data = data;
                         global.LCU_auth = `${btoa(`${global.LCU_data.username}:${global.LCU_data.password}`)}`;
-
-                        resolve(true);
                     });
 
                     this.lcuConnector.on('disconnect', () => {
@@ -64,11 +66,17 @@ class ExpressServer {
                     setTimeout(() => {
                         reject(`[LCU_TIMEOUT]: Express server timed out while attempting to read LCU data. Probably because no running League Client was found.`);
                     }, 10000);
+
+                    resolve(app);
                 });
             } catch (error) {
                 reject(error);
             }
         });
+    }
+
+    close() {
+        this.server?.close();
     }
 
     async handleRequest({req, res, method = 'GET', options = {}}) {
