@@ -1,0 +1,3 @@
+[submodule "op.gg-api"]
+	path = op.gg-api
+	url = https://github.com/justinsmid/op.gg-api
