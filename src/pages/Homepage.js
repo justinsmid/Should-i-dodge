@@ -4,6 +4,10 @@ import {useEffectOnce} from '../Util';
 import './Homepage.css';
 import OPGGClient from '../../op.gg-api/client';
 
+const electron = window.require('electron').remote;
+const dialog = electron.dialog;
+const shell = electron.shell;
+
 const Homepage = () => {
     const [inChampSelect, setInChampSelect] = useState(false);
     const [champSelectData, setChampSelectData] = useState(null);
@@ -54,13 +58,41 @@ const ChampSelectView = ({data}) => {
                 })
             );
 
-            summonerNames.forEach(async name => {
-                console.log(`OP.GG data for summoner '${name}':`);
+            summonerNames.forEach(name => {
+                const showDodgeWarning = (text) => {
+                    return dialog.showMessageBox({
+                        title: 'You should consider dodging',
+                        type: 'warning',
+                        message: text,
+                        buttons: [
+                            `View ${name}'s OP.GG`,
+                            'Dismiss'
+                        ],
+                        cancelId: 1,
+                        noLink: true
+                    })
+                        .then(({response: clickedBtnIndex}) => {
+                            if (clickedBtnIndex === 0) {
+                                // TODO: Un-hardcode server 'na'
+                                shell.openExternal(`https://na.op.gg/summoner/userName=${name}`);
+                            }
+                        });
+                };
 
                 // TODO: Un-hardcode server 'na'
-                const response = await opggClient.SummonerStats('na', name);
+                opggClient.SummonerStats('na', name)
+                    .then(stats => {
+                        console.log(`OP.GG data for summoner '${name}':`);
+                        console.log(stats);
 
-                console.log(response);
+                        if (stats.winRatio <= 46) {
+                            showDodgeWarning(`${name} has a winrate of ${stats.winRatio}%.`);
+                        } else if (stats.streakType === "LOSS_STREAK" && stats.streak >= 3) {
+                            showDodgeWarning(`${name} is on a ${stats.streak} game loss-streak.`);
+                        } else if (stats.gameCount >= 1000) {
+                            showDodgeWarning(`${name} has over 1000 games played this season.`);
+                        }
+                    });
             });
 
             setSummonerNames(summonerNames);
