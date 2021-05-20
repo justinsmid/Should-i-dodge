@@ -1,7 +1,7 @@
 import Homepage from "./Homepage";
 import SettingsPage from "./SettingsPage";
 
-export default [
+const routes = [
     {
         path: ['/', '/home'],
         linkPath: '/home',
@@ -15,3 +15,5 @@ export default [
         component: SettingsPage
     }
 ];
+
+export default routes;

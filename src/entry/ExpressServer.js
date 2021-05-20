@@ -51,8 +51,6 @@ class ExpressServer {
                     global.serverUrl = `http://localhost:${this.port}`;
 
                     this.lcuConnector.on('connect', data => {
-                        console.log('LCU data: ', data);
-
                         global.LCU_data = data;
                         global.LCU_auth = `${btoa(`${global.LCU_data.username}:${global.LCU_data.password}`)}`;
                     });
