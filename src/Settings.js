@@ -8,7 +8,7 @@ class Settings {
         minGameCount: 1000
     }
 
-    // TODO: Actually use settings when checking op.gg's
+    // TODO: Actually use settings' port numbers
 
     /* TODO: Add more settings
     *   checkSelf: boolean - Whether the app should check the user's op.gg

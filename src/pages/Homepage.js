@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {get} from '../Api';
-import {useEffectOnce} from '../Util';
+import {getGlobal, useEffectOnce} from '../Util';
 import './Homepage.css';
 import OPGGClient from '../../op.gg-api/client';
 
@@ -59,6 +59,8 @@ const ChampSelectView = ({data}) => {
             );
 
             summonerNames.forEach(name => {
+                const settings = getGlobal('settings');
+
                 const showDodgeWarning = (text) => {
                     return dialog.showMessageBox({
                         title: 'You should consider dodging',
@@ -85,11 +87,11 @@ const ChampSelectView = ({data}) => {
                         console.log(`OP.GG data for summoner '${name}':`);
                         console.log(stats);
 
-                        if (stats.winRatio <= 46) {
+                        if (stats.winRatio <= settings.dodgeBoundaries.maxWinratio) {
                             showDodgeWarning(`${name} has a winrate of ${stats.winRatio}%.`);
-                        } else if (stats.streakType === "LOSS_STREAK" && stats.streak >= 3) {
+                        } else if (stats.streakType === "LOSS_STREAK" && stats.streak >= settings.dodgeBoundaries.minStreak) {
                             showDodgeWarning(`${name} is on a ${stats.streak} game loss-streak.`);
-                        } else if (stats.gameCount >= 1000) {
+                        } else if (stats.gameCount >= settings.dodgeBoundaries.minGameCount) {
                             showDodgeWarning(`${name} has over 1000 games played this season.`);
                         }
                     });
