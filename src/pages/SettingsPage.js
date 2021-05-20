@@ -38,7 +38,7 @@ const SettingsPage = () => {
             if (err) {
                 console.error('Error while storing settings in storage');
             } else {
-                window.alert('Settings saved successfully!');
+                window.alert('Settings saved successfully!\nIf any server ports were changed, a restart of the application will be necessary for these changes to take effect.');
             }
             window.close();
         });

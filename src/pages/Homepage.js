@@ -49,7 +49,7 @@ const Homepage = () => {
 
 const ChampSelectView = ({data}) => {
     const [summonerNames, setSummonerNames] = useState([]);
-    const opggClient = new OPGGClient();
+    const opggClient = new OPGGClient({opggApiServerPort: getGlobal('settings').opggApiServerPort});
 
     useEffectOnce(() => {
         const getSummonerNames = async () => {

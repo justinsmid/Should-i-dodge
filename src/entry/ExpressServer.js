@@ -8,6 +8,8 @@ const btoa = string => Buffer.from(string).toString('base64');
 
 const jsonResponse = res => res.json();
 
+const DEFAULT_EXPRESS_SERVER_PORT = 6969;
+
 class ExpressServer {
     port;
     server;
@@ -106,4 +108,4 @@ class ExpressServer {
     };
 }
 
-module.exports = { ExpressServer };
+module.exports = { ExpressServer, DEFAULT_EXPRESS_SERVER_PORT };

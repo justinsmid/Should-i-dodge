@@ -1,7 +1,7 @@
 const electron = require('electron');
 const path = require('path');
 const url = require('url');
-const {ExpressServer} = require('./ExpressServer');
+const {ExpressServer, DEFAULT_EXPRESS_PORT} = require('./ExpressServer');
 const {startServer: startOpggApiServer} = require('../../op.gg-api/server');
 const {Tray, Menu} = require('electron');
 const Settings = require('../Settings');
@@ -9,8 +9,6 @@ const Settings = require('../Settings');
 const {app, BrowserWindow} = electron;
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
-
-const EXPRESS_PORT = 6969;
 
 let mainWindow;
 let expressServer;
@@ -45,8 +43,8 @@ async function createMainWindow() {
     return mainWindow;
 };
 
-const startExpressServer = () => {
-    const expressServer = new ExpressServer(EXPRESS_PORT);
+const startExpressServer = (port = DEFAULT_EXPRESS_PORT) => {
+    const expressServer = new ExpressServer(port);
     expressServer.start()
         .then(() => console.log(`Express server listening at 'http://localhost:${global.expressServerPort}'`))
         .catch(error => {
@@ -106,8 +104,8 @@ app.on('ready', async () => {
     global.settings = Settings.fromStorageOrNew();
 
     mainWindow = createMainWindow();
-    expressServer = await startExpressServer();
-    opggApiServer = await startOpggApiServer();
+    expressServer = await startExpressServer(global.settings.expressServerPort);
+    opggApiServer = await startOpggApiServer(global.settings.opggApiServerPort);
     tray = createTray();
 });
 
