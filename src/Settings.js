@@ -1,3 +1,6 @@
+const storage = require('electron-json-storage');
+global.storage = storage;
+
 class Settings {
     expressServerPort = 6969;
     opggApiServerPort = 2424;
@@ -23,8 +26,9 @@ class Settings {
     }
 
     static fromStorageOrNew() {
-        // TODO: Attempt to get settings from storage
-        return new Settings();
+        const data = storage.getSync('settings') ?? {};
+
+        return new Settings(data);
     }
 }
 

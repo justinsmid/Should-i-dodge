@@ -27,6 +27,7 @@
     "@testing-library/user-event": "^12.8.3",
     "buffer": "^6.0.3",
     "cors": "^2.8.5",
+    "electron-json-storage": "git+https://github.com/electron-userland/electron-json-storage.git",
     "express": "^4.17.1",
     "is-electron": "^2.2.0",
     "lcu-connector": "^2.1.3",

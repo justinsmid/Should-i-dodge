@@ -32,12 +32,16 @@ const SettingsPage = () => {
     };
 
     const handleSaveClick = () => {
-        console.log('Saving settings...');
+        const storage = getGlobal('storage');
 
-        // TODO: Store settings in file
-        // window.alert('Settings saved successfully!');
-
-        window.close();
+        storage.set('settings', getGlobal('settings'), (err) => {
+            if (err) {
+                console.error('Error while storing settings in storage');
+            } else {
+                window.alert('Settings saved successfully!');
+            }
+            window.close();
+        });
     };
 
     return (
