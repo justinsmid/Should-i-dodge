@@ -14,6 +14,7 @@
     "dev": "nf start",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
+    "preinstall": "git submodule update --init --recursive",
     "postinstall": "submodules-install"
   },
   "submodules": [
