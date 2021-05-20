@@ -36,10 +36,13 @@ const Homepage = () => {
 
     return (
         <div>
-            {inChampSelect ?
-                <ChampSelectView data={champSelectData} />
-                : <p>Waiting for champ select...</p>
-            }
+            <a href="/settings" className="nav-link">Settings</a>
+            <div>
+                {inChampSelect ?
+                    <ChampSelectView data={champSelectData} />
+                    : <p>Waiting for champ select...</p>
+                }
+            </div>
         </div>
     );
 };

@@ -46,7 +46,9 @@ const SettingsPage = () => {
 
     return (
         <div>
-            <h1>Settings page</h1>
+            <h1>Settings</h1>
+
+            <a href="/" className="nav-link">Home</a>
 
             <div className="column">
                 <Accordion title='Dodge boundaries' defaultExpanded>
