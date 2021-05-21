@@ -75,32 +75,36 @@ const createTray = () => {
     tray.setToolTip('Should-i-dodge');
 
     const contextMenu = Menu.buildFromTemplate([
-        {label: 'settings', type: 'normal', click: () => {
-            console.log(`Opening settings...`);
+        {
+            label: 'settings', type: 'normal', click: () => {
+                console.log(`Opening settings...`);
 
-            settingsWindow = new BrowserWindow({
-                width: 1024,
-                height: 768,
-                webPreferences: {
-                    nodeIntegration: true,
-                    enableRemoteModule: true,
-                    contextIsolation: false
-                }
-            });
-        
-            const settingsUrl = (baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'settings');
-            settingsWindow.loadURL(settingsUrl);
-        
-            settingsWindow.webContents.openDevTools();
-        
-            settingsWindow.on('closed', function () {
-                settingsWindow = null
-            });
-        }},
-        {label: 'exit', type: 'normal', click: () => {
-            console.log(`Exiting...`);
-            exit();
-        }},
+                settingsWindow = new BrowserWindow({
+                    width: 1024,
+                    height: 768,
+                    webPreferences: {
+                        nodeIntegration: true,
+                        enableRemoteModule: true,
+                        contextIsolation: false
+                    }
+                });
+
+                const settingsUrl = (baseUrl + (baseUrl.endsWith('/') ? '' : '/') + 'settings');
+                settingsWindow.loadURL(settingsUrl);
+
+                settingsWindow.webContents.openDevTools();
+
+                settingsWindow.on('closed', function () {
+                    settingsWindow = null
+                });
+            }
+        },
+        {
+            label: 'exit', type: 'normal', click: () => {
+                console.log(`Exiting...`);
+                exit();
+            }
+        },
     ]);
 
     tray.addListener('double-click', () => {
@@ -127,7 +131,7 @@ app.on('ready', async () => {
     champSelectChecker = new ChampSelectChecker();
     champSelectChecker.on('champSelectFound', checkChampSelectLobby);
     champSelectInterval = champSelectChecker.startChampSelectInterval();
-    
+
 });
 
 app.on('window-all-closed', () => {
@@ -143,15 +147,18 @@ app.on('activate', function () {
 const checkChampSelectLobby = async champSelectData => {
     const opggClient = new OPGGClient({opggApiServerPort: global.settings.opggApiServerPort});
 
-    const summonerNames = await Promise.all(
-        champSelectData.myTeam.map(async playerData => {
-            const response = await get(`/lol-summoner/v1/summoners/${playerData.summonerId}`);
+    const userSummonerId = champSelectData.myTeam.find(playerData => playerData.cellId === champSelectData.localPlayerCellId).summonerId;
 
-            return response.displayName;
-        })
-    );
+    let summoners = await Promise.all(champSelectData.myTeam.map(async playerData => {
+        return await get(`/lol-summoner/v1/summoners/${playerData.summonerId}`);
+    }));
 
-    summonerNames.forEach(name => {
+    // Remove user's summoner name if settings say not to check the user's summoner
+    if (global.settings.checkSelf === false) {
+        summoners = summoners.filter(summoner => summoner.summonerId !== userSummonerId);
+    }
+
+    summoners.forEach(({displayName: name}) => {
         const settings = global.settings;
 
         const showDodgeWarning = (text) => {
@@ -177,9 +184,6 @@ const checkChampSelectLobby = async champSelectData => {
         // TODO: Un-hardcode server 'na'
         opggClient.SummonerStats('na', name)
             .then(stats => {
-                console.log(`OP.GG data for summoner '${name}':`);
-                console.log(stats);
-
                 // TODO: Handle `stats` having null values, due to someone being unranked, or not having any recent games 
                 if (stats.winRatio <= settings.dodgeBoundaries.maxWinratio) {
                     showDodgeWarning(`${name} has a winrate of ${stats.winRatio}%.`);

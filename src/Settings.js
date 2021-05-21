@@ -13,12 +13,8 @@ class Settings {
         minGameCount: 1000
     }
 
-    /* TODO: Add more settings
-    *   checkSelf: boolean - Whether the app should check the user's op.gg
-    *   champSelectInterval: number - interval for checking whether the user is in a champ select lobby
-    *   ...
-    */
-    
+    checkSelf = false;
+
     constructor(partialSettings) {
         if (!!partialSettings) {
             Object.assign(this, partialSettings);

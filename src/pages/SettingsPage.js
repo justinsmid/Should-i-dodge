@@ -31,6 +31,11 @@ const SettingsPage = () => {
         forceUpdate();
     };
 
+    const handleCheckSelfChanged = e => {
+        settings.checkSelf = e.target.checked;
+        forceUpdate();
+    }
+
     const handleSaveClick = () => {
         const storage = getGlobal('storage');
 
@@ -61,6 +66,13 @@ const SettingsPage = () => {
                     <label>
                         Min game count:
                             <input type="number" value={settings.dodgeBoundaries.minGameCount} onChange={handleMinGameCountChange} />
+                    </label>
+                </Accordion>
+
+                <Accordion title='Configuration'>
+                    <label>
+                        Check self:
+                            <input type="checkbox" checked={settings.checkSelf} onChange={handleCheckSelfChanged} />
                     </label>
                 </Accordion>
 
