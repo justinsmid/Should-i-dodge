@@ -48,8 +48,6 @@ const SettingsPage = () => {
         <div>
             <h1>Settings</h1>
 
-            <a href="/" className="nav-link">Home</a>
-
             <div className="column">
                 <Accordion title='Dodge boundaries' defaultExpanded>
                     <label>

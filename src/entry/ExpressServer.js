@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = require('node-fetch');
+const fetch = require('cross-fetch');
 const LCUConnector = require('lcu-connector');
 const cors = require('cors');
 

@@ -5,6 +5,9 @@ const {ExpressServer, DEFAULT_EXPRESS_PORT} = require('./ExpressServer');
 const {startServer: startOpggApiServer} = require('../../op.gg-api/server');
 const {Tray, Menu} = require('electron');
 const Settings = require('../Settings');
+const {get} = require('../Api');
+const {ChampSelectChecker} = require('../ChampSelectChecker');
+const OPGGClient = require('../../op.gg-api/client');
 
 const {app, BrowserWindow} = electron;
 
@@ -14,6 +17,8 @@ let mainWindow;
 let expressServer;
 let opggApiServer;
 let tray;
+let champSelectChecker;
+let champSelectInterval;
 
 const baseUrl = process.env.ELECTRON_START_URL || url.format({
     pathname: path.join(__dirname, '/../build/index.html'),
@@ -21,7 +26,7 @@ const baseUrl = process.env.ELECTRON_START_URL || url.format({
     slashes: true
 });
 
-async function createMainWindow() {
+function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 1024,
         height: 768,
@@ -39,6 +44,8 @@ async function createMainWindow() {
     mainWindow.on('closed', function () {
         mainWindow = null
     });
+
+    mainWindow.hide();
 
     return mainWindow;
 };
@@ -96,6 +103,15 @@ const createTray = () => {
         }},
     ]);
 
+    tray.addListener('double-click', () => {
+        if (mainWindow) {
+            mainWindow.show();
+            mainWindow.focus();
+        } else {
+            mainWindow = createMainWindow();
+        }
+    });
+
     tray.setContextMenu(contextMenu);
     return tray;
 };
@@ -107,12 +123,15 @@ app.on('ready', async () => {
     expressServer = await startExpressServer(global.settings.expressServerPort);
     opggApiServer = await startOpggApiServer(global.settings.opggApiServerPort);
     tray = createTray();
+
+    champSelectChecker = new ChampSelectChecker();
+    champSelectChecker.on('champSelectFound', checkChampSelectLobby);
+    champSelectInterval = champSelectChecker.startChampSelectInterval();
+    
 });
 
-app.on('window-all-closed', function () {
-    if (process.platform !== 'darwin') {
-        exit();
-    }
+app.on('window-all-closed', () => {
+    // Do nothing.
 });
 
 app.on('activate', function () {
@@ -121,10 +140,63 @@ app.on('activate', function () {
     }
 });
 
+const checkChampSelectLobby = async champSelectData => {
+    const opggClient = new OPGGClient({opggApiServerPort: global.settings.opggApiServerPort});
+
+    const summonerNames = await Promise.all(
+        champSelectData.myTeam.map(async playerData => {
+            const response = await get(`/lol-summoner/v1/summoners/${playerData.summonerId}`);
+
+            return response.displayName;
+        })
+    );
+
+    summonerNames.forEach(name => {
+        const settings = global.settings;
+
+        const showDodgeWarning = (text) => {
+            return electron.dialog.showMessageBox({
+                title: 'You should consider dodging',
+                type: 'warning',
+                message: text,
+                buttons: [
+                    `View ${name}'s OP.GG`,
+                    'Dismiss'
+                ],
+                cancelId: 1,
+                noLink: true
+            })
+                .then(({response: clickedBtnIndex}) => {
+                    if (clickedBtnIndex === 0) {
+                        // TODO: Un-hardcode server 'na'
+                        electron.shell.openExternal(`https://na.op.gg/summoner/userName=${name}`);
+                    }
+                });
+        };
+
+        // TODO: Un-hardcode server 'na'
+        opggClient.SummonerStats('na', name)
+            .then(stats => {
+                console.log(`OP.GG data for summoner '${name}':`);
+                console.log(stats);
+
+                // TODO: Handle `stats` having null values, due to someone being unranked, or not having any recent games 
+                if (stats.winRatio <= settings.dodgeBoundaries.maxWinratio) {
+                    showDodgeWarning(`${name} has a winrate of ${stats.winRatio}%.`);
+                } else if (stats.streakType === "LOSS_STREAK" && stats.streak >= settings.dodgeBoundaries.minStreak) {
+                    showDodgeWarning(`${name} is on a ${stats.streak} game loss-streak.`);
+                } else if (stats.gameCount >= settings.dodgeBoundaries.minGameCount) {
+                    showDodgeWarning(`${name} has over 1000 games played this season.`);
+                }
+            });
+    });
+};
+
 const exit = () => {
     expressServer?.close();
     opggApiServer?.close();
     tray?.destroy();
     app.quit();
+    clearInterval(champSelectInterval);
     process.exit(0);
-}
+};
