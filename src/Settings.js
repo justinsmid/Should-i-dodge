@@ -13,8 +13,6 @@ class Settings {
         minGameCount: 1000
     }
 
-    // TODO: Actually use settings' port numbers
-
     /* TODO: Add more settings
     *   checkSelf: boolean - Whether the app should check the user's op.gg
     *   champSelectInterval: number - interval for checking whether the user is in a champ select lobby

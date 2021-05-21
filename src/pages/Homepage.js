@@ -90,6 +90,7 @@ const ChampSelectView = ({data}) => {
                         console.log(`OP.GG data for summoner '${name}':`);
                         console.log(stats);
 
+                        // TODO: Handle `stats` having null values, due to someone being unranked, or not having any recent games 
                         if (stats.winRatio <= settings.dodgeBoundaries.maxWinratio) {
                             showDodgeWarning(`${name} has a winrate of ${stats.winRatio}%.`);
                         } else if (stats.streakType === "LOSS_STREAK" && stats.streak >= settings.dodgeBoundaries.minStreak) {
