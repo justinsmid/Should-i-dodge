@@ -30,6 +30,7 @@ function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 1024,
         height: 768,
+        show: false,
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
@@ -44,8 +45,6 @@ function createMainWindow() {
     mainWindow.on('closed', function () {
         mainWindow = null
     });
-
-    mainWindow.hide();
 
     return mainWindow;
 };
@@ -198,9 +197,17 @@ const checkChampSelectLobby = async champSelectData => {
 
 const exit = () => {
     expressServer?.close();
+    expressServer = null;
+
     opggApiServer?.close();
+    opggApiServer = null;
+
     tray?.destroy();
-    app.quit();
+    tray = null;
+
     clearInterval(champSelectInterval);
+
+    app.quit();
+    
     process.exit(0);
 };
