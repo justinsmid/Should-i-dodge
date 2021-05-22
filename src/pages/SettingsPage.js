@@ -1,6 +1,8 @@
 import React from 'react';
 import Accordion from '../components/Accordion';
 import {getGlobal, useForceUpdate} from '../Util';
+import InfoIcon from '@material-ui/icons/Info';
+import {Tooltip} from '@material-ui/core';
 
 const SettingsPage = () => {
     const forceUpdate = useForceUpdate();
@@ -55,41 +57,39 @@ const SettingsPage = () => {
 
             <div className="column">
                 <Accordion title='Dodge boundaries' defaultExpanded>
-                    <label>
-                        Max winratio:
-                            <input type="number" value={settings.dodgeBoundaries.maxWinratio} onChange={handleMaxWinratioChange} />
-                    </label>
-                    <label>
-                        Min loss-streak:
-                            <input type="number" value={settings.dodgeBoundaries.minStreak} onChange={handleMinStreakChange} />
-                    </label>
-                    <label>
-                        Min game count:
-                            <input type="number" value={settings.dodgeBoundaries.minGameCount} onChange={handleMinGameCountChange} />
-                    </label>
+                    <SettingInput title='Max winratio' info='Warn me when someone has a lower winrate than this' type="number" value={settings.dodgeBoundaries.maxWinratio} onChange={handleMaxWinratioChange} />
+                    <SettingInput title='Min loss-streak' type="number" value={settings.dodgeBoundaries.minStreak} onChange={handleMinStreakChange} />
+                    <SettingInput title='Min game count' info='Warn me when someone has more than this many games played this season' type="number" value={settings.dodgeBoundaries.minGameCount} onChange={handleMinGameCountChange} />
                 </Accordion>
 
                 <Accordion title='Configuration'>
-                    <label>
-                        Check self:
-                            <input type="checkbox" checked={settings.checkSelf} onChange={handleCheckSelfChanged} />
-                    </label>
+                    <SettingInput title='Check self' info='Whether this application should check your op.gg aswell' type="checkbox" checked={settings.checkSelf} onChange={handleCheckSelfChanged} />
                 </Accordion>
 
                 <Accordion title='Server ports'>
-                    <label>
-                        Express server port:
-                            <input type="number" value={settings.expressServerPort} onChange={handleExpressServerPortChange} />
-                    </label>
-                    <label>
-                        Op.gg api server port:
-                            <input type="number" value={settings.opggApiServerPort} onChange={handleOpggApiServerPortChange} />
-                    </label>
+                    <SettingInput title='Express server port' type="number" value={settings.expressServerPort} onChange={handleExpressServerPortChange} />
+                    <SettingInput title='Op.gg api server port' type="number" value={settings.opggApiServerPort} onChange={handleOpggApiServerPortChange} />
                 </Accordion>
             </div>
 
             <button onClick={handleSaveClick}>Save</button>
         </div >
+    );
+};
+
+const SettingInput = ({title, info, ...props}) => {
+    return (
+        <div className="flex-center">
+            <label>
+                {title}:
+                <input {...props} />
+            </label>
+            {info && (
+                <Tooltip title={info}>
+                    <InfoIcon style={{color: '#1976d2'}} />
+                </Tooltip>
+            )}
+        </div>
     );
 };
 
