@@ -8,6 +8,7 @@ const Settings = require('../Settings');
 const {get} = require('../Api');
 const {ChampSelectChecker} = require('../ChampSelectChecker');
 const OPGGClient = require('../../op.gg-api/client');
+const {exists} = require('../Util');
 
 const {app, BrowserWindow} = electron;
 
@@ -216,12 +217,11 @@ const checkChampSelectLobby = async champSelectData => {
         // TODO: Un-hardcode server 'na'
         opggClient.SummonerStats('na', name)
             .then(stats => {
-                // TODO: Handle `stats` having null values, due to someone being unranked, or not having any recent games 
-                if (stats.winRatio <= settings.dodgeBoundaries.maxWinratio) {
+                if (exists(stats.winRatio) && stats.winRatio <= settings.dodgeBoundaries.maxWinratio) {
                     showDodgeWarning(`${name} has a winrate of ${stats.winRatio}%.`);
-                } else if (stats.streakType === "LOSS_STREAK" && stats.streak >= settings.dodgeBoundaries.minStreak) {
+                } else if (exists(stats.streakType, stats.streak) && stats.streakType === "LOSS_STREAK" && stats.streak >= settings.dodgeBoundaries.minStreak) {
                     showDodgeWarning(`${name} is on a ${stats.streak} game loss-streak.`);
-                } else if (stats.gameCount >= settings.dodgeBoundaries.minGameCount) {
+                } else if (exists(stats.gameCount) && stats.gameCount >= settings.dodgeBoundaries.minGameCount) {
                     showDodgeWarning(`${name} has over 1000 games played this season.`);
                 }
             });

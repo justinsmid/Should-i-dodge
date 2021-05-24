@@ -1,11 +1,12 @@
 import React from 'react';
 import Accordion from '../components/Accordion';
-import {equalsIgnoreCase, getGlobal, useForceUpdate} from '../Util';
+import {equalsIgnoreCase, useForceUpdate} from '../Util';
+import {getGlobal} from '../ElectronUtil';
 import InfoIcon from '@material-ui/icons/Info';
 import DeleteIcon from '@material-ui/icons/DeleteForever';
 import {Tooltip} from '@material-ui/core';
 import './SettingsPage.css';
-import {multiPrompt} from '../Util';
+import {multiPrompt} from '../ElectronUtil';
 
 const SettingsPage = () => {
     const forceUpdate = useForceUpdate();
