@@ -158,10 +158,14 @@ const checkChampSelectLobby = async champSelectData => {
         return await get(`/lol-summoner/v1/summoners/${playerData.summonerId}`);
     }));
 
+    const allSummonerNames = summoners.map(x => x.displayName);
+
     // Remove user's summoner name if settings say not to check the user's summoner
     if (global.settings.checkSelf === false) {
         summoners = summoners.filter(summoner => summoner.summonerId !== userSummonerId);
     }
+
+    const summonerNames = summoners.map(x => x.displayName);
 
     summoners.forEach(({displayName: name}) => {
         const settings = global.settings;
@@ -173,15 +177,26 @@ const checkChampSelectLobby = async champSelectData => {
                 message: text,
                 buttons: [
                     `View ${name}'s OP.GG`,
+                    'View lobby\'s multi OP.GG',
                     'Dismiss'
                 ],
-                cancelId: 1,
+                cancelId: 2,
                 noLink: true
             })
                 .then(({response: clickedBtnIndex}) => {
+                    switch (clickedBtnIndex) {
+                        case 0: // Open op.gg
+                            // TODO: Un-hardcode server 'na'
+                            electron.shell.openExternal(`https://na.op.gg/summoner/userName=${name}`);
+                            break;
+                        case 1: // Open multi op.gg
+                            // TODO: Un-hardcode server 'na'
+                            electron.shell.openExternal(`https://na.op.gg/multi/query=${encodeURIComponent(allSummonerNames.join(','))}`);
+                            break;
+                        default: break;
+                    }
                     if (clickedBtnIndex === 0) {
-                        // TODO: Un-hardcode server 'na'
-                        electron.shell.openExternal(`https://na.op.gg/summoner/userName=${name}`);
+
                     }
                 });
         };
