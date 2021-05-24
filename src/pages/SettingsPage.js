@@ -1,8 +1,11 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Accordion from '../components/Accordion';
-import {getGlobal, useForceUpdate} from '../Util';
+import {equalsIgnoreCase, getGlobal, useForceUpdate} from '../Util';
 import InfoIcon from '@material-ui/icons/Info';
+import DeleteIcon from '@material-ui/icons/DeleteForever';
 import {Tooltip} from '@material-ui/core';
+import './SettingsPage.css';
+import {multiPrompt} from '../Util';
 
 const SettingsPage = () => {
     const forceUpdate = useForceUpdate();
@@ -38,6 +41,55 @@ const SettingsPage = () => {
         forceUpdate();
     }
 
+    const handleAddToDodgeListClick = () => {
+        promptDodgeListItem()
+            .then(res => {
+                if (res) {
+                    if (settings.dodgeList.some(x => equalsIgnoreCase(x.name, res.name))) {
+                        alert(`'${res.name}' is already on your dodge list.`);
+                        return;
+                    }
+                    settings.dodgeList = [...settings.dodgeList, {name: res.name, reason: res.reason || ''}];
+                    forceUpdate();
+                }
+            });
+    }
+
+    const promptDodgeListItem = () => {
+        return multiPrompt({
+            title: 'Add to dodge list',
+            type: 'multi-input',
+            width: 500,
+            height: 300,
+            resizable: true,
+            inputArray: [
+                {
+                    key: 'name',
+                    label: 'Name',
+                    attributes: {
+                        placeholder: 'Name...',
+                        required: true,
+                        type: 'text'
+                    }
+                },
+                {
+                    key: 'reason',
+                    label: 'Reason (Optional)',
+                    attributes: {
+                        placeholder: 'Reason...',
+                        required: false,
+                        type: 'text'
+                    }
+                }
+            ]
+        }, {});
+    }
+
+    const handleRemoveDodgeListItem = item => {
+        settings.dodgeList = settings.dodgeList.filter(x => !equalsIgnoreCase(x.name, item.name));
+        forceUpdate();
+    }
+
     const handleSaveClick = () => {
         const storage = getGlobal('storage');
 
@@ -60,6 +112,19 @@ const SettingsPage = () => {
                     <SettingInput title='Max winratio' info='Warn me when someone has a lower winrate than this' type="number" value={settings.dodgeBoundaries.maxWinratio} onChange={handleMaxWinratioChange} />
                     <SettingInput title='Min loss-streak' type="number" value={settings.dodgeBoundaries.minStreak} onChange={handleMinStreakChange} />
                     <SettingInput title='Min game count' info='Warn me when someone has more than this many games played this season' type="number" value={settings.dodgeBoundaries.minGameCount} onChange={handleMinGameCountChange} />
+                </Accordion>
+                <Accordion title={<TextWithInfo title='Dodge list' info='Show a warning whenever anyone on this list is in your lobby' />}>
+                    <div className="dodge-list">
+                        <div>
+                            {settings.dodgeList.length < 1
+                                ? <p>No items found on your dodge list...</p>
+                                : settings.dodgeList.map(item => (
+                                    <DodgeListItem item={item} onRemove={handleRemoveDodgeListItem} />
+                                ))}
+                        </div>
+
+                        <button className="add-to-dodge-list-btn" onClick={handleAddToDodgeListClick}>Add</button>
+                    </div>
                 </Accordion>
 
                 <Accordion title='Configuration'>
@@ -84,12 +149,40 @@ const SettingInput = ({title, info, ...props}) => {
                 {title}:
                 <input {...props} />
             </label>
-            {info && (
-                <Tooltip title={info}>
-                    <InfoIcon style={{color: '#1976d2'}} />
-                </Tooltip>
-            )}
+            {info && <Info title={info} />}
         </div>
+    );
+};
+
+const DodgeListItem = ({item, onRemove}) => {
+    return (
+        <div className="flex-center item">
+            <div className="column">
+                <p>{item.name}</p>
+                {!!item.reason && <small>{item.reason}</small>}
+            </div>
+
+            <Tooltip title={`Remove '${item.name}'`}>
+                <DeleteIcon onClick={() => onRemove(item)} />
+            </Tooltip>
+        </div>
+    );
+};
+
+const TextWithInfo = ({title, info}) => {
+    return (
+        <div className="flex-center">
+            <p>{title}</p>
+            {info && <Info title={info} />}
+        </div>
+    );
+}
+
+const Info = ({title = ''}) => {
+    return (
+        <Tooltip title={title}>
+            <InfoIcon style={{color: '#1976d2'}} />
+        </Tooltip>
     );
 };
 

@@ -81,7 +81,7 @@ class ExpressServer {
 
     async handleRequest({req, res, method = 'GET', options = {}}) {
         const {endpoint} = req.query;
-        console.log(`Handling [${method}] request for endpoint '${endpoint}'...`);
+        // console.log(`Handling [${method}] request for endpoint '${endpoint}'...`);
 
         const response = await this.sendRequest(endpoint, {method: method, ...options});
         const status = (response && response.httpStatus) || 200;

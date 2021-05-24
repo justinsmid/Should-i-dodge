@@ -9,7 +9,7 @@ const Accordion = ({title, children, ...props}) => {
                 <p>{title}</p>
             </AccordionSummary >
             <AccordionDetails>
-                <div className="column">
+                <div className="column full-width">
                     {children}
                 </div>
             </AccordionDetails>

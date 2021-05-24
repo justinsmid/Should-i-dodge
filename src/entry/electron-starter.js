@@ -20,6 +20,12 @@ let tray;
 let champSelectChecker;
 let champSelectInterval;
 
+const equalsIgnoreCase = (target, string) => {
+    if (typeof target !== "string" || typeof string !== "string") return false;
+
+    return string.toLowerCase() === target.toLowerCase();
+};
+
 const baseUrl = process.env.ELECTRON_START_URL || url.format({
     pathname: path.join(__dirname, '/../build/index.html'),
     protocol: 'file:',
@@ -180,6 +186,13 @@ const checkChampSelectLobby = async champSelectData => {
                 });
         };
 
+        // If the name is on the dodge list, show a warning
+        const dodgeListItemIndex = settings.dodgeList.findIndex(x => equalsIgnoreCase(x.name, name));
+        if (dodgeListItemIndex !== -1) {
+            const dodgeListItem = settings.dodgeList[dodgeListItemIndex];
+            showDodgeWarning(`${name} is on your dodge list ${!!dodgeListItem.reason ? `with the given reason: '${dodgeListItem.reason}'` : ''}.`);
+        }
+
         // TODO: Un-hardcode server 'na'
         opggClient.SummonerStats('na', name)
             .then(stats => {
@@ -208,6 +221,6 @@ const exit = () => {
     clearInterval(champSelectInterval);
 
     app.quit();
-    
+
     process.exit(0);
 };

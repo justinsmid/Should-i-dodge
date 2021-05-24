@@ -15,6 +15,8 @@ class Settings {
 
     checkSelf = false;
 
+    dodgeList = [];
+
     constructor(partialSettings) {
         if (!!partialSettings) {
             Object.assign(this, partialSettings);

@@ -32,3 +32,7 @@ code {
   top: 10px;
   right: 10px;
 }
+
+.full-width {
+  width: 100%;
+}

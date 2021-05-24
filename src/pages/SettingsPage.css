@@ -1,0 +1,24 @@
+.dodge-list {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dodge-list .item {
+    width: 100%;
+    margin-bottom: 10px;
+    justify-content: space-between;
+}
+
+.dodge-list .item p {
+    margin: 0;
+}
+
+.dodge-list .item small {
+    color: gray;
+}
+
+.add-to-dodge-list-btn {
+    width: 50px;
+    height: 25px;
+}
