@@ -1,6 +1,6 @@
 # Should i dodge
 
-## Run
+## Installation
 1. Install [git](https://git-scm.com/downloads)
 2. Install [NodeJS LTS](https://nodejs.org/en/download/)
 3. Run the following commands:
