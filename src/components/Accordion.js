@@ -6,7 +6,10 @@ const Accordion = ({title, children, ...props}) => {
     return (
         <MUIAccordion {...props}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <p>{title}</p>
+                {typeof title === 'string'
+                    ? <p>{title}</p>
+                    : title
+                }
             </AccordionSummary >
             <AccordionDetails>
                 <div className="column full-width">

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import Accordion from '../components/Accordion';
 import {equalsIgnoreCase, getGlobal, useForceUpdate} from '../Util';
 import InfoIcon from '@material-ui/icons/Info';
@@ -125,7 +125,7 @@ const SettingsPage = () => {
                             {settings.dodgeList.length < 1
                                 ? <p>No items found on your dodge list...</p>
                                 : settings.dodgeList.map(item => (
-                                    <DodgeListItem item={item} onRemove={handleRemoveDodgeListItem} />
+                                    <DodgeListItem key={item.name} item={item} onRemove={handleRemoveDodgeListItem} />
                                 ))}
                         </div>
 
