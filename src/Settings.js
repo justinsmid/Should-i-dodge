@@ -13,6 +13,7 @@ class Settings {
         minGameCount: 1000
     }
 
+    openOpggMultiOnLobbyFound = true;
     checkSelf = false;
 
     dodgeList = [];

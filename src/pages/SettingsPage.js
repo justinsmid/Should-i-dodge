@@ -36,6 +36,11 @@ const SettingsPage = () => {
         forceUpdate();
     };
 
+    const handleOpenOpggMultiOnLobbyFoundChange = e => {
+        settings.openOpggMultiOnLobbyFound = e.target.checked;
+        forceUpdate();
+    }
+
     const handleCheckSelfChanged = e => {
         settings.checkSelf = e.target.checked;
         forceUpdate();
@@ -113,6 +118,7 @@ const SettingsPage = () => {
                     <SettingInput title='Min loss-streak' type="number" value={settings.dodgeBoundaries.minStreak} onChange={handleMinStreakChange} />
                     <SettingInput title='Min game count' info='Warn me when someone has more than this many games played this season' type="number" value={settings.dodgeBoundaries.minGameCount} onChange={handleMinGameCountChange} />
                 </Accordion>
+
                 <Accordion title={<TextWithInfo title='Dodge list' info='Show a warning whenever anyone on this list is in your lobby' />}>
                     <div className="dodge-list">
                         <div>
@@ -128,6 +134,7 @@ const SettingsPage = () => {
                 </Accordion>
 
                 <Accordion title='Configuration'>
+                    <SettingInput title='Open OP.GG multi upon entering champ select' type="checkbox" checked={settings.openOpggMultiOnLobbyFound} onChange={handleOpenOpggMultiOnLobbyFoundChange} />
                     <SettingInput title='Check self' info='Whether this application should check your op.gg aswell' type="checkbox" checked={settings.checkSelf} onChange={handleCheckSelfChanged} />
                 </Accordion>
 

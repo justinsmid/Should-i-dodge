@@ -167,6 +167,20 @@ const checkChampSelectLobby = async champSelectData => {
 
     const summonerNames = summoners.map(x => x.displayName);
 
+    const openOpgg = (name) => {
+        // TODO: Un-hardcode server 'na'
+        electron.shell.openExternal(`https://na.op.gg/summoner/userName=${name}`);
+    };
+
+    const openOpggMulti = (names) => {
+        // TODO: Un-hardcode server 'na'
+        electron.shell.openExternal(`https://na.op.gg/multi/query=${encodeURIComponent(names.join(','))}`);
+    };
+
+    if (global.settings.openOpggMultiOnLobbyFound === true) {
+        openOpggMulti(allSummonerNames);
+    }
+
     summoners.forEach(({displayName: name}) => {
         const settings = global.settings;
 
@@ -185,18 +199,9 @@ const checkChampSelectLobby = async champSelectData => {
             })
                 .then(({response: clickedBtnIndex}) => {
                     switch (clickedBtnIndex) {
-                        case 0: // Open op.gg
-                            // TODO: Un-hardcode server 'na'
-                            electron.shell.openExternal(`https://na.op.gg/summoner/userName=${name}`);
-                            break;
-                        case 1: // Open multi op.gg
-                            // TODO: Un-hardcode server 'na'
-                            electron.shell.openExternal(`https://na.op.gg/multi/query=${encodeURIComponent(allSummonerNames.join(','))}`);
-                            break;
+                        case 0: openOpgg(name); break;
+                        case 1: openOpggMulti(allSummonerNames); break;
                         default: break;
-                    }
-                    if (clickedBtnIndex === 0) {
-
                     }
                 });
         };
